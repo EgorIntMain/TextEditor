@@ -582,17 +582,14 @@ void File_Manager::file_save()
 	wstring buffer = L"0";
 
 	if (file_saved)
-	{
-		RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)buffer.data(), (DWORD)((wcslen(buffer.data()) + 1) * sizeof(wchar_t)));
-		PostQuitMessage(0);
-	}
+		PostMessageW(main_window, WM_DESTROY, 0, 0);
 
 	switch (MessageBoxW(main_window, L"Çבונודעט פאיכ?", L"Çבונודעט", MB_YESNOCANCEL | MB_ICONQUESTION))
 	{
 	case IDNO:
 	{
 		RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)buffer.data(), (DWORD)((wcslen(buffer.data()) + 1) * sizeof(wchar_t)));
-		PostQuitMessage(0);
+		PostMessageW(main_window, WM_DESTROY, 0, 0);
 		break;
 	}
 	case IDCANCEL:
@@ -605,7 +602,7 @@ void File_Manager::file_save()
 
 	RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)buffer.data(), (DWORD)((wcslen(buffer.data()) + 1) * sizeof(wchar_t)));
 
-	PostQuitMessage(0);
+	PostMessageW(main_window, WM_DESTROY, 0, 0);
 }
 
 Program_Manager::~Program_Manager()
