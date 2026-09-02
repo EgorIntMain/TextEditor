@@ -855,8 +855,10 @@ void File_Manager::open_file()
 	std::wifstream ifs(file_path, std::wifstream::binary);
 	ifs.imbue(std::locale(".UTF8"));
 
-	if (!ifs.is_open())
+	if (!ifs.is_open() && activated)
 		return void(MessageBoxW(main_window, L"Не можу відкрити файл!", L"Інформація", MB_OK));
+	else
+		return;
 
 	EDITSTREAM es = { 0 };
 	es.dwCookie = reinterpret_cast<DWORD_PTR>(&ifs);
