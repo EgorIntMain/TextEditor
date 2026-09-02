@@ -858,7 +858,10 @@ void File_Manager::open_file()
 	if (!ifs.is_open() && activated)
 		return void(MessageBoxW(main_window, L"Не можу відкрити файл!", L"Інформація", MB_OK));
 	else
+	{
+		RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)L"0", (DWORD)((wcslen(L"0") + 1) * sizeof(wchar_t)));
 		return;
+	}
 
 	EDITSTREAM es = { 0 };
 	es.dwCookie = reinterpret_cast<DWORD_PTR>(&ifs);
