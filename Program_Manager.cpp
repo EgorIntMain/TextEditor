@@ -579,8 +579,6 @@ void File_Manager::save_file_as()
 
 void File_Manager::file_save()
 {
-	wstring buffer = L"0";
-
 	if (file_saved)
 		PostMessageW(main_window, WM_DESTROY, 0, 0);
 
@@ -588,7 +586,7 @@ void File_Manager::file_save()
 	{
 	case IDNO:
 	{
-		RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)buffer.data(), (DWORD)((wcslen(buffer.data()) + 1) * sizeof(wchar_t)));
+		RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)L"0", (DWORD)((wcslen(L"0") + 1) * sizeof(wchar_t)));
 		PostMessageW(main_window, WM_DESTROY, 0, 0);
 		break;
 	}
@@ -600,7 +598,7 @@ void File_Manager::file_save()
 
 	open ? save_file() : save_file_as();
 
-	RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)buffer.data(), (DWORD)((wcslen(buffer.data()) + 1) * sizeof(wchar_t)));
+	RegSetKeyValueW(HKEY_CURRENT_USER, reg_way.c_str(), L"file_path", REG_SZ, (const BYTE*)L"0", (DWORD)((wcslen(L"0") + 1) * sizeof(wchar_t)));
 
 	PostMessageW(main_window, WM_DESTROY, 0, 0);
 }
