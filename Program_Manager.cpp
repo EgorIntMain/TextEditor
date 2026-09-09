@@ -5,6 +5,9 @@
 #include <filesystem>
 #include <windowsx.h>
 #include <regex>
+#include <winhttp.h>
+
+#pragma comment(lib, "winhttp.lib")
 
 Edit_Manager::Edit_Manager()
 {
@@ -542,7 +545,81 @@ void Program_Manager::activator()
 
 void Program_Manager::check_update()
 {
+	HINTERNET hSession = NULL, hConnect = NULL, hRequest = NULL;
 
+	hSession = WinHttpOpen(L"TextEditor Updater", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+
+	if (!hSession)
+		return;
+
+	hConnect = WinHttpConnect(hSession, L"api.github.com", INTERNET_DEFAULT_HTTPS_PORT, 0);
+
+	if (!hConnect)
+		return;
+
+	hRequest = WinHttpOpenRequest(hConnect, L"GET", L"/repos/EgorIntMain/TextEditor/releases/latest", NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
+
+	if (!hRequest)
+		return;
+
+	if (!WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) && !WinHttpReceiveResponse(hRequest, NULL))
+		return;
+
+	std::string responseData;
+	DWORD bytesAvailable = 0;
+	DWORD bytesRead = 0;
+
+	do {
+
+		WinHttpQueryDataAvailable(hRequest, &bytesAvailable);
+
+		if (bytesAvailable > 0)
+		{
+			char* buffer = new char[bytesAvailable + 1];
+
+			if (WinHttpReadData(hRequest, (LPVOID)buffer, bytesAvailable, &bytesRead))
+			{
+				buffer[bytesRead] = '\0';
+				responseData += buffer;
+			}
+
+			delete[] buffer;
+		}
+
+	} while (bytesAvailable > 0);
+
+	std::string searchString = "\"tag_name\":\"";
+	size_t pos = responseData.find(searchString);
+
+	if (pos == std::string::npos)
+		return;
+
+	pos += searchString.length();
+	size_t endPos = responseData.find("\"", pos);
+
+	if (endPos == std::string::npos)
+		return;
+
+	std::string latestVersion = responseData.substr(pos, endPos - pos);
+
+	if (latestVersion != "1")
+	{
+		std::wstring msg = L"Доступна нова версія: " + std::wstring(latestVersion.begin(), latestVersion.end()) +
+			L"\nПоточна версія: " + std::wstring(std::string("1").begin(), std::string("1").end()) +
+			L"\n\nБажаєте завантажити оновлення?";
+
+		if (MessageBoxW(NULL, msg.c_str(), L"Оновлення TextEditor", MB_ICONINFORMATION | MB_YESNO) == IDYES)
+			ShellExecuteW(0, 0, L"https://github.com/EgorIntMain/TextEditor/releases/latest", 0, 0, SW_SHOW);
+	}
+
+	if (hRequest) 
+		WinHttpCloseHandle(hRequest);
+
+	if (hConnect) 
+		WinHttpCloseHandle(hConnect);
+
+	if (hSession) 
+		WinHttpCloseHandle(hSession);
 }
 
 int get_screen_size(const int axis, const wstring& reg_way)
