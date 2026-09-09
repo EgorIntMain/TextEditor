@@ -603,9 +603,15 @@ void Program_Manager::check_update()
 					if (latestVersion != CURRENT_VERSION) {
 						
 
-						// Показуємо повідомлення користувачу
-						std::wstring msg = L"Доступна нова версія: " + std::wstring(latestVersion.begin(), latestVersion.end()) +
-							L"\nПоточна версія: " + std::wstring(std::string(CURRENT_VERSION).begin(), std::string(CURRENT_VERSION).end()) +
+						std::wstring wLatest(latestVersion.begin(), latestVersion.end());
+
+						// 2. Конвертуємо нашу поточну константу у wstring
+						std::string currentStr = CURRENT_VERSION;
+						std::wstring wCurrent(currentStr.begin(), currentStr.end());
+
+						// 3. Чисто та зрозуміло формуємо повідомлення
+						std::wstring msg = L"Доступна нова версія: " + wLatest +
+							L"\nПоточна версія: " + wCurrent +
 							L"\n\nБажаєте завантажити оновлення?";
 
 						int msgboxID = MessageBoxW(NULL, msg.c_str(), L"Оновлення TextEditor", MB_ICONINFORMATION | MB_YESNO);
