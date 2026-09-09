@@ -185,6 +185,9 @@ LRESULT CALLBACK MainProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		case DISCONNECT:
 			net.disconnect();
 			break;
+		case CHECK_UPDATE:
+			program.check_update();
+			break;
 		default:
 			break;
 		}

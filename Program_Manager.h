@@ -33,6 +33,7 @@
 #define CHANGE_YOU (WM_USER + 30)
 #define CREATE_EDIT_WINDOW (WM_USER + 31)
 #define DISCONNECT (WM_USER + 32)
+#define CHECK_UPDATE (WM_USER + 33)
 
 using std::wstring;
 
@@ -183,4 +184,5 @@ public:
 	Program_Manager(HWND window);
 	virtual ~Program_Manager();
 	virtual void activator() override;
+	void check_update();
 };

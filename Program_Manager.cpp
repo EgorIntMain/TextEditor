@@ -279,6 +279,7 @@ void Menu_Manager::activator()
 	AppendMenuW(Menu, MF_POPUP, (UINT_PTR)Text_Menu, L"Текстові операції");
 	AppendMenuW(Menu, MF_POPUP, (UINT_PTR)Together_Menu, L"Cпільне редагування файлу");
 	AppendMenuW(Menu, MF_STRING, CREATE_EDIT_WINDOW, L"Вікно налаштування");
+	AppendMenuW(Menu, MF_STRING, CHECK_UPDATE, L"Перевірити наявність оновлень");
 
 	SetMenu(main_window, Menu);
 }
@@ -537,6 +538,11 @@ void Program_Manager::activator()
 	Edit_Friend_Text_Window::activator();
 	Status_Bar::activator();
 	activated = true;
+}
+
+void Program_Manager::check_update()
+{
+
 }
 
 int get_screen_size(const int axis, const wstring& reg_way)
