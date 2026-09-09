@@ -1,5 +1,4 @@
-#include "P2PNetwork.h"      
-#include "For_window.h"      
+#include "P2PNetwork.h"          
 #include "Text.h"
 #include "Program_Manager.h"
 #define WM_NEW_NETWORK_TEXT (WM_USER + 1)

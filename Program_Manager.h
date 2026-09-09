@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Windows.h> 
+#include "For_window.h" 
 #include <commdlg.h>
 #include <string>
 #include <stack>
