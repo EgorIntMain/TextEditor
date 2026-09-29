@@ -1,6 +1,5 @@
 ﻿#include "resource.h"
 #include "For_window.h"
-#include "Program_Manager.h"
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow)
 {
