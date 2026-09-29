@@ -6,8 +6,6 @@
 #include <regex>
 #include <winhttp.h>
 
-#define CURRENT_VERSION "v1.0.0"
-
 #pragma comment(lib, "winhttp.lib")
 
 Edit_Manager::Edit_Manager()
@@ -548,76 +546,62 @@ void Program_Manager::check_update()
 {
 	HINTERNET hSession = NULL, hConnect = NULL, hRequest = NULL;
 
-	// 1. Відкриваємо сесію (ОБОВ'ЯЗКОВО вказуємо User-Agent, інакше GitHub відмовить у доступі)
-	hSession = WinHttpOpen(L"TextEditor Updater",
-		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME,
-		WINHTTP_NO_PROXY_BYPASS, 0);
+	hSession = WinHttpOpen(L"TextEditor Updater", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
 
-	if (hSession) {
-		// 2. Підключаємося до API GitHub через HTTPS (порт 443)
+	if (hSession) 
 		hConnect = WinHttpConnect(hSession, L"api.github.com", INTERNET_DEFAULT_HTTPS_PORT, 0);
-	}
 
-	if (hConnect) {
-		// 3. Формуємо GET-запит до останнього релізу вашого репозиторію
-		hRequest = WinHttpOpenRequest(hConnect, L"GET",
-			L"/repos/EgorIntMain/TextEditor/releases/latest",
-			NULL, WINHTTP_NO_REFERER,
-			WINHTTP_DEFAULT_ACCEPT_TYPES,
-			WINHTTP_FLAG_SECURE);
-	}
+	if (hConnect)
+		hRequest = WinHttpOpenRequest(hConnect, L"GET", L"/repos/EgorIntMain/TextEditor/releases/latest", NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
 
 	if (hRequest) {
-		// 4. Відправляємо запит і отримуємо відповідь
-		if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
-			WinHttpReceiveResponse(hRequest, NULL)) {
+		
+		if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) && WinHttpReceiveResponse(hRequest, NULL)) {
 
 			std::string responseData;
 			DWORD bytesAvailable = 0;
 			DWORD bytesRead = 0;
-
-			// 5. Зчитуємо дані (JSON-відповідь)
+			
 			do {
 				WinHttpQueryDataAvailable(hRequest, &bytesAvailable);
+
 				if (bytesAvailable > 0) {
+
 					char* buffer = new char[bytesAvailable + 1];
+
 					if (WinHttpReadData(hRequest, (LPVOID)buffer, bytesAvailable, &bytesRead)) {
 						buffer[bytesRead] = '\0';
 						responseData += buffer;
 					}
+
 					delete[] buffer;
 				}
 			} while (bytesAvailable > 0);
 
-			// 6. Простий "парсинг" JSON для пошуку версії
 			std::string searchString = "\"tag_name\":\"";
 			size_t pos = responseData.find(searchString);
+
 			if (pos != std::string::npos) {
+
 				pos += searchString.length();
 				size_t endPos = responseData.find("\"", pos);
+
 				if (endPos != std::string::npos) {
 					std::string latestVersion = responseData.substr(pos, endPos - pos);
 
-					// Порівнюємо версії
-					if (latestVersion != CURRENT_VERSION) {
+					if (latestVersion != curr_ver) {
 						
-
 						std::wstring wLatest(latestVersion.begin(), latestVersion.end());
 
-						// 2. Конвертуємо нашу поточну константу у wstring
-						std::string currentStr = CURRENT_VERSION;
+						std::string currentStr = curr_ver;
 						std::wstring wCurrent(currentStr.begin(), currentStr.end());
 
-						// 3. Чисто та зрозуміло формуємо повідомлення
 						std::wstring msg = L"Доступна нова версія: " + wLatest +
 							L"\nПоточна версія: " + wCurrent +
 							L"\n\nБажаєте завантажити оновлення?";
 
-						int msgboxID = MessageBoxW(NULL, msg.c_str(), L"Оновлення TextEditor", MB_ICONINFORMATION | MB_YESNO);
-
-						if (msgboxID == IDYES) {
-							// Якщо натиснуто "Так" - відкриваємо сторінку релізів у браузері
+						if (MessageBoxW(NULL, msg.c_str(), L"Оновлення TextEditor", MB_ICONINFORMATION | MB_YESNO) == IDYES)
+						{
 							ShellExecuteW(0, 0, L"https://github.com/EgorIntMain/TextEditor/releases/latest", 0, 0, SW_SHOW);
 						}
 					}
@@ -626,31 +610,33 @@ void Program_Manager::check_update()
 		}
 	}
 
-	// 7. Звільняємо ресурси (закриваємо хендли)
-	if (hRequest) WinHttpCloseHandle(hRequest);
-	if (hConnect) WinHttpCloseHandle(hConnect);
-	if (hSession) WinHttpCloseHandle(hSession);
+	if (hRequest) 
+		WinHttpCloseHandle(hRequest);
+
+	if (hConnect) 
+		WinHttpCloseHandle(hConnect);
+
+	if (hSession) 
+		WinHttpCloseHandle(hSession);
 }
 
-int get_screen_size(const int axis, const wstring& reg_way)
+string Info_keep::get_version()
 {
-    wstring valueName = (axis ? L"screen_h" : L"screen_w"), buffer = L"\0";
+	string ver = "\0", buffer = "\0";
 	DWORD bufferSize = sizeof(buffer);
 
-	int screen_size = 0;
-
-	switch (RegGetValueW(HKEY_CURRENT_USER, reg_way.data(), valueName.data(), RRF_RT_REG_SZ, NULL, buffer.data(), &bufferSize))
+	switch (RegGetValueW(HKEY_CURRENT_USER, reg_way.data(), L"curr_ver", RRF_RT_REG_SZ, NULL, buffer.data(), &bufferSize))
 	{
 	case ERROR_FILE_NOT_FOUND:
-		return GetSystemMetrics(axis);
+		return "1";
 	case ERROR_SUCCESS:
-		screen_size = (buffer.size() != 0 ? stoi(buffer) : GetSystemMetrics(axis));
+		ver = buffer;
 		break;
 	default:
-		return GetSystemMetrics(axis);
+		return "1";
 	}
 
-	return screen_size;
+	return ver;
 }
 
 Info_keep::Info_keep(): reg_way(L"Software\\TextEditor")
@@ -658,6 +644,7 @@ Info_keep::Info_keep(): reg_way(L"Software\\TextEditor")
 	screen_w = get_screen_size(SM_CXSCREEN, reg_way);
 	screen_h = get_screen_size(SM_CYSCREEN, reg_way);
 	activated = false;
+	curr_ver = get_version();
 }
 
 Info_keep::~Info_keep()

@@ -8,6 +8,27 @@
 #define WM_FRIEND_CONECTED_FRIEND (WM_USER + 5)
 #define WM_FRIEND_DISCONECTED_FRIEND (WM_USER + 6)
 
+int get_screen_size(const int axis, const wstring& reg_way)
+{
+	wstring valueName = (axis ? L"screen_h" : L"screen_w"), buffer = L"\0";
+	DWORD bufferSize = sizeof(buffer);
+
+	int screen_size = 0;
+
+	switch (RegGetValueW(HKEY_CURRENT_USER, reg_way.data(), valueName.data(), RRF_RT_REG_SZ, NULL, buffer.data(), &bufferSize))
+	{
+	case ERROR_FILE_NOT_FOUND:
+		return GetSystemMetrics(axis);
+	case ERROR_SUCCESS:
+		screen_size = (buffer.size() != 0 ? stoi(buffer) : GetSystemMetrics(axis));
+		break;
+	default:
+		return GetSystemMetrics(axis);
+	}
+
+	return screen_size;
+}
+
 WNDCLASS create_win(HBRUSH BGcolor, HCURSOR Cursor, HINSTANCE hInst, HICON Icon, LPCWSTR Name, WNDPROC procedure)
 {
 	WNDCLASS WND = { 0 };

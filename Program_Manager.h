@@ -36,10 +36,10 @@
 #define CHECK_UPDATE (WM_USER + 33)
 
 using std::wstring;
-
-int get_screen_size(const int axis, const wstring& reg_way);
+using std::string;
 
 class Info_keep {
+	string get_version();
 protected:
 	HWND edit;
 	HWND main_window;
@@ -52,6 +52,7 @@ protected:
 	bool file_saved;
 	bool activated;
 	wstring file_path;
+	string curr_ver;
 public:
 	Info_keep();
 	virtual ~Info_keep();
